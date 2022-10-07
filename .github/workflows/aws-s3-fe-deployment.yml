@@ -1,6 +1,10 @@
 name: AWS S3 FE App Deployment
 on:
   workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: environment
     secrets:
       NPM_AUTH_TOKEN:
         required: true
@@ -16,6 +20,8 @@ jobs:
   deployToS3:
     name: Upload to Amazon S3
     runs-on: ubuntu-latest
+    environment:
+      name: "${{ inputs.environment }}"
     permissions:
       id-token: write
       contents: read
