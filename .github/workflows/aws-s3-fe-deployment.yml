@@ -12,13 +12,6 @@ on:
         required: true
       AWS_S3_BUCKET_NAME:
         required: true
-    inputs:
-      environment:
-        required: true
-        type: environment
-      message:
-        required: true
-        type: string
 jobs:
   deployToS3:
     name: Upload to Amazon S3
