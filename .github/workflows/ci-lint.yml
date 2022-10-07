@@ -1,19 +1,23 @@
 name: CI - Lint App
-run-name: "${{ github.workflow }} - ${{ github.ref_name }}"
-on: 
-  push:
-    branches: [ main, release/*/main, release/*/feature/*, release/*/bug/* ]
+on:
+  workflow_call:
+    secrets:
+      NPM_AUTH_TOKEN:
+        required: true
 jobs:
   lintApp:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [ 14, 16, 18 ]
     steps:
     - uses: actions/checkout@v2
     - name: Set Node Version
       uses: actions/setup-node@v2
       with:
-        node-version: 14.x
+        node-version: ${{ matrix.version }}
     - name: Add NPM Token
-      run: 'echo "//registry.npmjs.org/:_authToken=${{ secrets.NpmAuthToken }}" > .npmrc'
+      run: 'echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > .npmrc'
     - name: Install modules
       run: yarn
     - name: Lint project
