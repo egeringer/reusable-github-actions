@@ -1,0 +1,54 @@
+name: AWS S3 FE App Deployment
+on:
+  workflow_call:
+    secrets:
+      NPM_AUTH_TOKEN:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_ROLE_TO_ASSUME:
+        required: true
+      AWS_S3_BUCKET_NAME:
+        required: true
+    inputs:
+      environment:
+        required: true
+        type: environment
+      message:
+        required: true
+        type: string
+jobs:
+  deployToS3:
+    name: Upload to Amazon S3
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+        aws-secret-access-key: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+        role-to-assume: '${{ secrets.AWS_ROLE_TO_ASSUME }}'
+        role-duration-seconds: 1200
+        aws-region: us-east-1
+    - name: Add NPM Token
+      run: 'echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > .npmrc'
+    - name: Branch name
+      run: echo running on branch $(echo $GITHUB_REF | cut -d"/" -f 4)
+    - name: Add Version Number
+      run: 'echo "{ \"version\" : \"$(echo $GITHUB_REF | cut -d"/" -f 4)\" }" > ./src/version.json'
+    - name: Install Dependencies
+      run: |
+        yarn install
+    - name: Build App
+      run: |
+        yarn build
+    - name: Copy files to the AWS Account with the AWS CLI
+      run: |
+        aws s3 sync --delete --acl public-read ./build s3://"${{ secrets.AWS_S3_BUCKET_NAME }}"
