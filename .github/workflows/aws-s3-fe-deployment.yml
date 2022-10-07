@@ -4,7 +4,7 @@ on:
     inputs:
       environment:
         required: true
-        type: environment
+        type: string
     secrets:
       NPM_AUTH_TOKEN:
         required: true
