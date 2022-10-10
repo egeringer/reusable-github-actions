@@ -20,6 +20,9 @@ jobs:
   deployToS3:
     name: Upload to Amazon S3
     runs-on: ubuntu-latest
+    outputs:
+      buildResult: ${{ steps.buildApp.outcome }}
+      uploadResult: ${{ steps.uploadApp.outcome }}
     environment:
       name: "${{ inputs.environment }}"
     permissions:
@@ -46,8 +49,10 @@ jobs:
       run: |
         yarn install
     - name: Build App
+      id: buildApp
       run: |
         yarn build
     - name: Copy files to the AWS Account with the AWS CLI
+      id: uploadApp
       run: |
         aws s3 sync --delete --acl public-read ./build s3://"${{ secrets.AWS_S3_BUCKET_NAME }}"
