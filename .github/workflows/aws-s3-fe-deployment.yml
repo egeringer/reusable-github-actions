@@ -5,6 +5,13 @@ on:
       environment:
         required: true
         type: string
+    outputs:
+      buildResult:
+        description: "Value of the build step"
+        value: ${{ jobs.deployToS3.outputs.buildResult }}
+      uploadResult:
+        description: "Value of the upload step"
+        value: ${{ jobs.deployToS3.outputs.uploadResult }}
     secrets:
       NPM_AUTH_TOKEN:
         required: true
